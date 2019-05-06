@@ -1,0 +1,75 @@
+.base-info {
+  .crumb {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 20px;
+    line-height: 20px;
+    zoom: 1;
+    &::after {
+      display: block;
+      clear: both;
+      visibility: hidden;
+      height: 0;
+      overflow: hidden;
+      content: "";
+    }
+  }
+  .info-form {
+    &:first-child {
+      margin-top: 25px;
+    }
+    & div {
+      font-size: 16px;
+      color: #222;
+      margin-bottom: 10px;
+    }
+  }
+  .cf-form {
+    .ivu-form {
+      &-item {
+        &:nth-child(1) {
+          height: 88px;
+          img {
+            width: 88px;
+            height: 88px;
+          }
+          label {
+            height: 88px;
+            line-height: 88px;
+          }
+        }
+        margin-bottom: 40px;
+        height: 18px;
+        line-height: 18px;
+        &-content {
+          height: 100%;
+          line-height: 100%;
+          font-size: 14px;
+          span {
+            margin-right: 16px;
+            vertical-align: text-top;
+          }
+        }
+        &-label {
+          padding: 0;
+          height: 100%;
+          line-height: 100%;
+          font-size: 14px;
+          color: #999;
+          margin-right: 30px;
+          display: inline-block;
+        }
+      }
+    }
+    .update {
+      display: inline-block;
+      margin-left: 0;
+      font-size: 14px;
+      height: 100%;
+      line-height: 100%;
+      // margin-top: -3px;
+      color: #4477d0;
+      vertical-align: text-top;
+    }
+  }
+}

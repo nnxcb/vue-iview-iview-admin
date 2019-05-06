@@ -1,0 +1,41 @@
+.ct-table {
+  .ivu-table {
+    &-cell {
+      padding: 0 5px;
+      font-size: 12px;
+      // font-weight: normal;
+    }
+    &-fixed, &-fixed-right {
+      margin-top: 48px;
+    }
+  }
+  &.no-header {
+    .ivu-table {
+      &-fixed, &-fixed-right {
+        margin-top: 0 !important;
+      }
+    }
+  }
+  button {
+    margin-top: 1px;
+    margin-bottom: 1px;
+  }
+  button + button {
+    margin-left: 2px;
+  }
+  .ivu-poptip + button, button + .ivu-poptip {
+    margin-left: 2px;
+  }
+  &.row-depand {
+    .ivu-table {
+      &-row{
+        .ivu-table-cell-with-expand {
+          display: none
+        }
+        // td:nth-child(5) {
+          
+        // }
+      }
+    }
+  }
+}
