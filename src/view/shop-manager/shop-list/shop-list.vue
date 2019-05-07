@@ -34,7 +34,7 @@
 
 <script>
 import '@/assets/css/custom-table.less'
-import { cellInput, toolButtonDelete, toolButtonEdit, toolButtonCancel } from '@/libs/table_edit_func'
+import { cellInput, cellSwitch, toolButtonDelete, toolButtonEdit, toolButtonCancel } from '@/libs/table_edit_func'
 import { timestampToTime } from '@/libs/tools'
 import { userPrivileges } from '@/libs/enumType'
 import util from '@/libs/util2'
@@ -51,25 +51,32 @@ export default {
       columnList: [
         {
           title: '产品名称',
-          key: 'product_name',
+          key: 'p_name',
           align: 'center',
           minWidth: 90,
           editable: true
         },
         {
-          title: '产品等级',
-          key: 'shop_level',
+          title: '产品价格（/元）',
+          key: 'p_price',
           align: 'center',
           minWidth: 90,
           editable: true
         },
         {
-          title: '描述',
-          key: 'description',
+          title: '剩余数量',
+          key: 'p_count',
           align: 'center',
           minWidth: 100,
           editable: true
         },
+        // {
+        //   title: '状态',
+        //   key: 'p_states',
+        //   align: 'center',
+        //   minWidth: 100,
+        //   editable: true
+        // },
         {
           title: '创建时间',
           key: 'create_time',
@@ -167,13 +174,21 @@ export default {
 
       for (let column of this.columnList) {
         if (column.editable) {
-          if (column.key === 'product_name') {
+          if (column.key === 'p_name') {
             column.render = (h, params) => {
               return cellInput(this, column, h, params, '输入产品名称')
             }
-          } else if (column.key === 'description') {
+          } else if (column.key === 'p_price') {
             column.render = (h, params) => {
-              return cellInput(this, column, h, params, this.userPrivileges)
+              return cellInput(this, column, h, params)
+            }
+          } else if (column.key === 'p_count') {
+            column.render = (h, params) => {
+              return cellInput(this, column, h, params)
+            }
+          } else if (column.key === 'p_states') {
+            column.render = (h, params) => {
+              return cellSwitch(this, column, h, params, !params.row.cellEditable, 1, 0, '开启', '关闭')
             }
           }
         } else {
@@ -215,9 +230,10 @@ export default {
         arr.push({
           id: info.id,
           user_id: info.user_id,
-          product_name: info.product_name,
-          shop_level: info.shop_level,
-          description: info.description,
+          p_name: info.p_name,
+          p_price: info.p_price,
+          p_count: info.p_count,
+          p_states: info.p_states,
           create_time: timestampToTime(info.create_time),
           update_time: timestampToTime(info.update_time),
           cellEditable: false,
@@ -259,10 +275,10 @@ export default {
         data.cellEditable = true
         this.isEditing = true
       } else if (data.cellEditable) {
-        util.confirmModal(this, '更新权限', '更新', data.roleName, '', this.updateRole, undefined, data, index)
+        util.confirmModal(this, '更新权限', '更新', data.roleName, '', this.update, undefined, data, index)
       }
     },
-    updateRole (data, index) {
+    update (data, index) {
       if (data.isUpdating) {
         util.Notice(this, 'warning', '正在等待服务器返回数据，请稍后再试')
         this.tempData = {}
