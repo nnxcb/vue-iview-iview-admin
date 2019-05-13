@@ -13,7 +13,7 @@
           size="large" :disabled="isEditing" @click="showAddUserModal = true; isAppending = true;">添加
         </Button> -->
         <Row type="flex" justify="center">
-          <span class="table-header">商品列表</span>
+          <span class="table-header">购买记录</span>
         </Row>
       </div>
     </Table>
@@ -22,9 +22,13 @@
         <Page :total="totalCount" :current.sync="currentPage" :page-size="pageSize" @on-change="loadData(); isEditing = false; isAppending = false;"></Page>
       </div>
     </div>
-    <Modal v-model="photoModal" width="550" footer-hide>
-      <img :src="photoSrc" width="100%">
-    </Modal>
+    <!--权限修改页面-->
+    <!-- <Modal ref="privilegeModal" v-model="showChangeUserRoleModal" :title="title"
+      width="550" :loading="modalLoading" :mask-closable="false" @on-ok="updateUserRole">
+      <Row type="flex" justify="start" align="middle">
+        <Tree :data="roleData" show-checkbox @on-check-change="changeUserRole"></Tree>
+      </Row>
+    </Modal> -->
   </div>
 </template>
 
@@ -32,11 +36,11 @@
 import '@/assets/css/custom-table.less'
 import { cellInput, cellSwitch, toolButtonDelete, toolButtonEdit, toolButtonCancel } from '@/libs/table_edit_func'
 import { timestampToTime } from '@/libs/tools'
-import { userPrivileges } from '@/libs/enumType'
+import { evaluateEvaluation } from '@/libs/enumType'
 import util from '@/libs/util2'
 
 export default {
-  name: 'shop_list',
+  name: 'purchase_record_page',
   data () {
     return {
       totalCount: 0,
@@ -46,31 +50,42 @@ export default {
       listArr: [],
       columnList: [
         {
-          title: '产品名称',
-          key: 'p_name',
+          title: '购买人',
+          key: 'customer_name',
           align: 'center',
           minWidth: 90,
           editable: true
         },
         {
-          title: '产品样图',
-          key: 'P_photo',
+          title: '商品名称',
+          key: 'product_name',
           align: 'center',
           minWidth: 100
         },
         {
-          title: '产品价格（/元）',
-          key: 'p_price',
+          title: '购买数量（/个）',
+          key: 'count',
           align: 'center',
           minWidth: 90,
           editable: true
         },
         {
-          title: '剩余数量',
-          key: 'p_count',
+          title: '购买时间',
+          key: 'buy_time',
+          align: 'center',
+          minWidth: 130,
+          ellipsis: true
+        },
+        {
+          title: '评价等级',
+          key: 'evaluate',
           align: 'center',
           minWidth: 100,
-          editable: true
+          editable: true,
+          sortable: true,
+          render: (h, params) => {
+            return h('div', {}, evaluateEvaluation[params.row.evaluate])
+          }
         },
         // {
         //   title: '状态',
@@ -80,15 +95,8 @@ export default {
         //   editable: true
         // },
         {
-          title: '创建时间',
-          key: 'create_time',
-          align: 'center',
-          minWidth: 130,
-          ellipsis: true
-        },
-        {
-          title: '更新时间',
-          key: 'update_time',
+          title: '描述',
+          key: 'description',
           align: 'center',
           minWidth: 130,
           ellipsis: true
@@ -137,17 +145,15 @@ export default {
         title: { required: true, message: '消息标题不能为空', trigger: 'blur' },
         content: { required: true, message: '消息内容不能为空', trigger: 'blur' }
       },
-      receivedUser: 0,
-      photoModal: false,
-      photoSrc: ''
+      receivedUser: 0
     }
   },
   computed: {
-    userPrivileges () {
+    evaluateEvaluation () {
       let obj = {}
-      Object.keys(userPrivileges).map(key => {
-        if (userPrivileges[key] !== 0 && key !== '0') {
-          obj[key] = userPrivileges[key]
+      Object.keys(evaluateEvaluation).map(key => {
+        if (evaluateEvaluation[key] !== 0 && key !== '0') {
+          obj[key] = evaluateEvaluation[key]
         }
       })
       return obj
@@ -178,15 +184,15 @@ export default {
 
       for (let column of this.columnList) {
         if (column.editable) {
-          if (column.key === 'p_name') {
+          if (column.key === 'customer_name') {
             column.render = (h, params) => {
               return cellInput(this, column, h, params, '输入产品名称')
             }
-          } else if (column.key === 'p_price') {
+          } else if (column.key === 'count') {
             column.render = (h, params) => {
               return cellInput(this, column, h, params)
             }
-          } else if (column.key === 'p_count') {
+          } else if (column.key === 'evaluate') {
             column.render = (h, params) => {
               return cellInput(this, column, h, params)
             }
@@ -196,33 +202,13 @@ export default {
             }
           }
         } else {
-          if (column.key === 'create_time' || column.key === 'update_time') {
+          if (column.key === 'createTime' || column.key === 'updateTime') {
             column.render = (h, params) => {
-              let time = timestampToTime(params.row[column.key])
+              let time = util.timestampToTime(params.row[column.key])
               if (time.indexOf('NaN') !== -1) {
                 time = ''
               }
               return h('div', time)
-            }
-          } else if (column.key === 'P_photo') {
-            column.render = (h, params) => {
-              let that = this
-              let src = 'http://localhost:8084/images/zpf/' + params.row.id + '.jpg'
-              return h('img', {
-                attrs: {
-                  src: src
-                },
-                on: {
-                  click: function () {
-                    that.showPhoto(src)
-                  }
-                },
-                style: {
-                  width: '100px',
-                  height: '60px',
-                  marginTop: '4px'
-                }
-              })
             }
           }
         }
@@ -237,8 +223,8 @@ export default {
       }
       let ok = (vm, res) => {
         this.loadingData = false
-        // this.totalCount = res.count
-        this.initTable(res.data)
+        this.totalCount = res.data.count
+        this.initTable(res.data.result)
       }
       let error = (vm, err) => {
         if (err !== undefined) {
@@ -246,7 +232,7 @@ export default {
         }
         this.loadingData = false
       }
-      util.processRequest(this, '/product/query', 'post', data, ok, error)
+      util.processRequest(this, '/purchase/record/query', 'post', data, ok, error)
     },
     initTable (data) {
       let arr = []
@@ -254,12 +240,13 @@ export default {
         arr.push({
           id: info.id,
           user_id: info.user_id,
-          p_name: info.p_name,
-          p_price: info.p_price,
-          p_count: info.p_count,
+          customer_name: info.customer_name,
+          product_name: info.product_name,
+          count: info.count,
+          evaluate: info.evaluate,
           p_states: info.p_states,
-          create_time: info.create_time,
-          update_time: info.update_time,
+          description: info.description,
+          buy_time: timestampToTime(info.buy_time),
           cellEditable: false,
           isUpdating: false
         })
@@ -338,7 +325,7 @@ export default {
 
       let ok = (vm, res) => {
         util.Notice(this, 'success', '更新权限信息成功')
-        this.$set(this.listArr[index], 'update_time', new Date().valueOf())
+        this.$set(this.listArr[index], 'updateTime', new Date().valueOf())
         // reset
         data.cellEditable = false
         data.isUpdating = false
@@ -364,14 +351,10 @@ export default {
       this.$set(this.listArr, index, this.tempDataArr[index])
       this.tempData = {}
       this.tempDataArr[index] = {}
-    },
-    showPhoto (src) {
-      this.photoModal = true
-      this.$set(this, 'photoSrc', src)
     }
   },
   created () {
-    this.init()
+    // this.init()
   },
   mounted () {
     this.loadData()

@@ -78,7 +78,7 @@ module.exports = {
     useLocalIp: true, // 允许浏览器使用本地 IP 打开
     disableHostCheck: true, // 允许使用host配置访问
     host: 'localhost',
-    port: 8082,
+    port: 8888,
     // proxy: 'localhost:3000'
     // proxy: 'http://192.168.0.176:10081/'
     // proxy: 'http://localhost:9977/'

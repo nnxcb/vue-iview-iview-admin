@@ -90,7 +90,7 @@ util.Notice = function (vm, type, title, desc = '', duration = 3, render = undef
   }
 }
 
-util.processRequest = (vm, url, method, reqData, fOk = null, fError = null, timeout = 15000) => {
+util.processRequest = (vm, url, method, reqData, fOk = null, fError = null, timeout = 150000) => {
   axios.request({
     url: url,
     method: method,

@@ -17,6 +17,7 @@ export default {
   shop_manager: '店铺管理',
   shop_add: '新增店铺',
   shop_list: '店铺列表',
+  purchase_record_page: '购买记录',
   join_page: 'QQ群',
   doc: '文档',
   update_table_page: '上传CSV文件',

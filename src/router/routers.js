@@ -152,6 +152,34 @@ export default [
       }
     ]
   },
+  {
+    path: '/purchase_record',
+    name: 'purchase_record',
+    meta: {
+      hideInBread: true
+    },
+    component: Main,
+    children: [
+      {
+        path: '/purchase_record_page',
+        name: 'purchase_record_page',
+        meta: {
+          icon: 'md-clipboard',
+          title: '购买记录'
+        },
+        component: () => import('@/view/purchase-record/purchase-record.vue')
+      }
+    ]
+  },
+  // {
+  //   path: '/purchase_record',
+  //   name: 'purchase_record',
+  //   meta: {
+  //     icon: 'md-clipboard',
+  //     title: '购买记录'
+  //   },
+  //   component: () => import('@/view/purchase-record/purchase-record.vue')
+  // },
   // {
   //   path: '/update',
   //   name: 'update',

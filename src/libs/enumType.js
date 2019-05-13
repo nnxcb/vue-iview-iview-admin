@@ -18,3 +18,13 @@ export const userPrivileges = {
   '2': '超级会员',
   '3': '管理员'
 }
+
+// 顾客评价等级
+export const evaluateEvaluation = {
+  '好评': 1,
+  '中评': 2,
+  '差评': 3,
+  '1': '好评',
+  '2': '中评',
+  '3': '差评'
+}

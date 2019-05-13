@@ -183,9 +183,12 @@ export default {
             }
           }
         } else {
-          if (column.key === 'createTime' || column.key === 'updateTime') {
+          if (column.key === 'create_time' || column.key === 'update_time') {
             column.render = (h, params) => {
-              let time = util.timestampToTime(params.row[column.key])
+              let time = ''
+              if (params.row[column.key]) {
+                time = timestampToTime(params.row[column.key])
+              }
               if (time.indexOf('NaN') !== -1) {
                 time = ''
               }
@@ -224,8 +227,8 @@ export default {
           user_status: info.user_status,
           shop_level: info.shop_level,
           shop_name: info.shop_name,
-          create_time: timestampToTime(info.create_time),
-          update_time: timestampToTime(info.update_time),
+          create_time: info.create_time,
+          update_time: info.update_time,
           cellEditable: false,
           isUpdating: false
         })
@@ -304,7 +307,7 @@ export default {
 
       let ok = (vm, res) => {
         util.Notice(this, 'success', '更新权限信息成功')
-        this.$set(this.listArr[index], 'updateTime', new Date().valueOf())
+        this.$set(this.listArr[index], 'update_time', new Date().valueOf())
         // reset
         data.cellEditable = false
         data.isUpdating = false
