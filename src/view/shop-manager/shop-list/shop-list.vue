@@ -10,7 +10,7 @@
       class="ct-table">
       <div slot="header" style="position: relative;">
         <!-- <Button type="primary" style="position: absolute;right: 0;margin-top: 5px;margin-right: 10px;"
-          size="large" :disabled="isEditing" @click="showAddUserModal = true; isAppending = true;">添加
+          size="large" :disabled="isEditing" @click="addFakeDataDictionary">添加
         </Button> -->
         <Row type="flex" justify="center">
           <span class="table-header">商品列表</span>
@@ -25,6 +25,13 @@
     <Modal v-model="photoModal" width="550" footer-hide>
       <img :src="photoSrc" width="100%">
     </Modal>
+    <Modal v-model="photoUpload" footer-hide>
+      <form enctype="multipart/form-data">
+        <input type="file" id="fileccc" @change="getFile($event)">
+        <Button v-if="canUpload" @click="submitForm($event)">确定</Button>
+      </form>
+      <!-- <img :src="imgSrc" alt="" v-if="showImg" width="500px" height="auto"><br> -->
+    </Modal>
   </div>
 </template>
 
@@ -35,6 +42,19 @@ import { timestampToTime } from '@/libs/tools'
 import { userPrivileges } from '@/libs/enumType'
 import util from '@/libs/util2'
 
+const toolButtonUpload = (vm, h, params) => {
+  return h('Button', {
+    props: {
+      size: 'small'
+    },
+    on: {
+      click: () => {
+        vm.uploadPhoto(params)
+      }
+    }
+  }, '上传')
+}
+
 export default {
   name: 'shop_list',
   data () {
@@ -42,6 +62,7 @@ export default {
       totalCount: 0,
       currentPage: 1,
       pageSize: 10,
+      canUpload: false,
       loadingData: false,
       listArr: [],
       columnList: [
@@ -54,7 +75,7 @@ export default {
         },
         {
           title: '产品样图',
-          key: 'P_photo',
+          key: 'p_photo',
           align: 'center',
           minWidth: 100
         },
@@ -139,6 +160,7 @@ export default {
       },
       receivedUser: 0,
       photoModal: false,
+      photoUpload: false,
       photoSrc: ''
     }
   },
@@ -204,25 +226,37 @@ export default {
               }
               return h('div', time)
             }
-          } else if (column.key === 'P_photo') {
+          } else if (column.key === 'p_photo') {
             column.render = (h, params) => {
               let that = this
               let src = 'http://localhost:8084/images/zpf/' + params.row.id + '.jpg'
-              return h('img', {
-                attrs: {
-                  src: src
-                },
-                on: {
-                  click: function () {
-                    that.showPhoto(src)
+              if (params.row.p_photo === -1) {
+                let children = []
+                children.push(toolButtonUpload(this, h, params, 'noAccess'))
+                return h('div', {
+                  style: {
+                    textAlign: 'center'
                   }
-                },
-                style: {
-                  width: '100px',
-                  height: '60px',
-                  marginTop: '4px'
-                }
-              })
+                }, [
+                  h('div', children)
+                ])
+              } else {
+                return h('img', {
+                  attrs: {
+                    src: src
+                  },
+                  on: {
+                    click: function () {
+                      that.showPhoto(src)
+                    }
+                  },
+                  style: {
+                    width: '100px',
+                    height: '60px',
+                    marginTop: '4px'
+                  }
+                })
+              }
             }
           }
         }
@@ -365,9 +399,57 @@ export default {
       this.tempData = {}
       this.tempDataArr[index] = {}
     },
+    resetRow2 (data, index) {
+      this.isEditing = false
+      this.isAppending = false
+      this.listArr.splice(0, 1)
+      this.templistArr[index] = {}
+      this.tempData = {}
+    },
     showPhoto (src) {
       this.photoModal = true
       this.$set(this, 'photoSrc', src)
+    },
+    addFakeDataDictionary () {
+      this.isAppending = true
+      this.isEditing = true
+
+      let data = []
+      data.push({
+        p_name: '',
+        p_photo: -1,
+        p_price: '',
+        p_count: '',
+        cellEditable: true,
+        isUpdating: false
+      })
+      this.listArr.splice(0, 0, ...data)
+    },
+    uploadPhoto (params) {
+      this.photoUpload = true
+    },
+    cancel () {
+      this.passwordModal = false
+      this.updatePassword = {}
+    },
+    getFile (event) {
+      debugger
+      this.file = event.target.files[0]
+      this.canUpload = true
+    },
+    submitForm (event) {
+      event.preventDefault()
+      let formData = new FormData()
+      formData.append('file', this.file)
+      let ok = (vm, res) => {
+        vm.imgSrc = baseUrl + res.data.substr(6, res.data.length)
+        vm.fileName = res.data
+        vm.showImg = true
+      }
+      let error = (vm, err) => {
+        debugger
+      }
+      util.processRequest(this, '/product/photo', 'post', formData, ok, error)
     }
   },
   created () {

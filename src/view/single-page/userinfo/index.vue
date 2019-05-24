@@ -9,15 +9,15 @@
       <FormItem label="用户名">{{ userName }}</FormItem>
       <FormItem label="商铺名称">{{ baseUserInfo.shop_name }}</FormItem>
       <FormItem label="商铺等级">{{ baseUserInfo.shop_level }}级
-        <a @click="details">
+        <!-- <a @click="details">
           详情
-        </a>
+        </a> -->
       </FormItem>
       <!-- <FormItem label="邮箱">
         <span>{{ baseUserInfo.name }}</span>
       </FormItem> -->
       <FormItem label="登录密码" key="password">
-        <a class="update" @click="showModal('password')">修改</a>
+        <a class="update" @click="passwordModal = true">修改</a>
       </FormItem>
       <!-- <FormItem label="手机">
         <span v-if="baseUserInfo.mobile">{{ baseUserInfo.mobile }}</span>
@@ -27,6 +27,19 @@
         <span>{{ baseUserInfo.create_time }}</span>
       </FormItem>
     </Form>
+    <Modal v-model="passwordModal" title="更改密码" @on-ok="ok" @on-cancel="cancel">
+      <Form :model="updatePassword" :label-width="104" label-position="right" class="cf-form">
+        <FormItem label="输入旧密码：">
+          <Input type="password" v-model="updatePassword.oldPassword" placeholder="输入旧密码"/>
+        </FormItem>
+        <FormItem label="输入新密码：">
+          <Input type="password" v-model="updatePassword.newPassword" placeholder="输入新密码"/>
+        </FormItem>
+        <FormItem label="确认新密码：">
+          <Input type="password" v-model="updatePassword.truePassword" placeholder="确认新密码"/>
+        </FormItem>
+      </Form>
+    </Modal>
   </div>
 </template>
 
@@ -50,7 +63,13 @@ export default {
         create_time: ''
       },
       avatar: '',
-      userName: ''
+      userName: '',
+      passwordModal: false,
+      updatePassword: {
+        oldPassword: '',
+        newPassword: '',
+        truePassword: ''
+      }
     }
   },
   methods: {
@@ -72,6 +91,44 @@ export default {
     },
     details () {
       debugger
+    },
+    ok () {
+      let updatePassword = this.updatePassword
+      let { newPassword, truePassword } = updatePassword
+      if (newPassword.length < 6 || newPassword.length > 18) {
+        util.Notice(this, 'warning', '密码长度不能小于6或大于18')
+        return
+      } else {
+        let passn = /^[a-zA-Z0-9]{1,}$/
+        if (!newPassword.match(passn)) {
+          util.Notice(this, 'warning', '密码只能包含英文字母、数字！')
+          return
+        }
+      }
+      if (newPassword !== truePassword) {
+        util.Notice(this, 'warning', '两次新密码输入不一致')
+      }
+      updatePassword.userName = this.userName
+      let ok = (vm, res) => {
+        this.updatePassword = {}
+        if (res.data === 501) {
+          util.Notice(this, 'error', '旧密码输入错误')
+        } else if (res.data === 201) {
+          util.Notice(this, 'success', '修改密码成功')
+        } else {
+          util.Notice(this, 'error', '修改密码失败', err)
+        }
+      }
+      let error = (vm, err) => {
+        if (err !== undefined) {
+          util.Notice(this, 'error', '修改密码失败', err)
+        }
+      }
+      util.processRequest(this, '/userinfo/update', 'post', updatePassword, ok, error)
+    },
+    cancel () {
+      this.passwordModal = false
+      this.updatePassword = {}
     }
   },
   mounted () {

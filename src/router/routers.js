@@ -138,18 +138,19 @@ export default [
         path: '/shop_list',
         name: 'shop_list',
         meta: {
+          icon: 'ios-cart-outline',
           title: '店铺列表'
         },
         component: () => import('@/view/shop-manager/shop-list/shop-list.vue')
-      },
-      {
-        path: '/shop_add',
-        name: 'shop_add',
-        meta: {
-          title: '新增店铺'
-        },
-        component: () => import('@/view/shop-manager/shop-add/shop-add.vue')
       }
+      // {
+      //   path: '/shop_add',
+      //   name: 'shop_add',
+      //   meta: {
+      //     title: '新增店铺'
+      //   },
+      //   component: () => import('@/view/shop-manager/shop-add/shop-add.vue')
+      // }
     ]
   },
   {

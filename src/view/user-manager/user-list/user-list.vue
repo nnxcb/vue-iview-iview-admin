@@ -104,6 +104,7 @@ export default {
       showChangePasswdModal: false,
       showAddUserModal: false,
       loading: true,
+      user_status: -1,
       formUserData: {
         newPassword: '',
         username: '',
@@ -220,6 +221,9 @@ export default {
     initTable (data) {
       let arr = []
       for (let info of data) {
+        if (info.username === this.$store.state.userName) {
+          this.user_status = info.user_status
+        }
         arr.push({
           id: info.id,
           username: info.username,
@@ -277,6 +281,11 @@ export default {
         this.tempData = {}
         return
       }
+      if (this.user_status !== 3) {
+        util.Notice(this, 'warning', '很抱歉，您没有修改权限')
+        this.tempData = {}
+        return
+      }
       data.isUpdating = true
       // 更新内部数据
       for (let key in this.tempData) {
@@ -315,6 +324,7 @@ export default {
         this.isEditing = false
         this.tempData = {}
         this.showChangePasswdModal = false
+        this.loadData()
       }
       let error = (vm, err) => {
         if (err !== undefined) {
